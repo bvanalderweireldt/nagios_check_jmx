@@ -16,26 +16,38 @@ public abstract class JmxBean {
 	
 	final static char	ESCAPE_CAR			=	'\'';
 	final static char	SEP_CAR				=	';';
-	
-	private JmxConnexion jmxCo;
+	final static String	SEP_WAR_CRI			=	":";
 	
 	private String 		objectName;
 	private String	 	attributes;
 
-	private int			value;
+	protected long		value;
 	private int			warning;
 	private int			critival;
 	private int			min;
 	private int			max;
 	
-	public JmxBean(String objectName, String attributes, int warning, int critical) {
+	public JmxBean(String objectName, String attributes){
 		value =  min = max = -1;
 		this.objectName = objectName;
-		this.attributes = attributes;
+		this.attributes = attributes;		
+	}
+	
+	public JmxBean(String objectName, String attributes, int warning, int critical) {
+		this(objectName, attributes);
 		this.warning = warning;
 		this.critival = critical;
 	}
 
+	public JmxBean(String objectName, String attributes, String warningCritical) {
+		this(objectName, attributes);
+		if(warningCritical == null || warningCritical.indexOf(SEP_WAR_CRI) == -1){
+			throw new IllegalArgumentException("warningCritical should be integers : <warning>:<critical>");
+		}
+		String[] args = warningCritical.split(SEP_WAR_CRI);
+		this.warning = Integer.parseInt(args[0]);
+		this.critival = Integer.parseInt(args[1]);
+	}
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(ESCAPE_CAR);
@@ -55,9 +67,11 @@ public abstract class JmxBean {
 		return sb.toString();
 	}
 	
-	private void queryJmx(){
+	public void queryJmx(JmxConnexion jmxCo){
 		try {
-			Object jxm = jmxCo.queryObject(objectName, attributes);
+			Object jmx = jmxCo.queryObject(objectName, attributes);
+			
+			getValueFromJmx(jmx);
 		} catch (MalformedObjectNameException | AttributeNotFoundException
 				| InstanceNotFoundException | MBeanException
 				| ReflectionException | IOException e) {
@@ -66,7 +80,13 @@ public abstract class JmxBean {
 		}
 	}
 	
-	private String emptyIfNegative(int i){
+	protected void getValueFromJmx(Object jmx) {
+		if(jmx instanceof Number){
+			value = (int) jmx;
+		}		
+	}
+
+	private String emptyIfNegative(long i){
 		return ( i == -1 ) ? "" : String.valueOf(i);
 	}
 	

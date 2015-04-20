@@ -13,4 +13,7 @@ public class JmxClassLoaded extends JmxBean{
 	public JmxClassLoaded(int warning, int critical) {
 		super(OBJECT_JAVA_PREFIX+CLASS_LOADED_OBJECT, CLASS_LOADED_ATTRIBUTE, warning, critical);
 	}
+	public JmxClassLoaded(String warningCritical) {
+		super(OBJECT_JAVA_PREFIX+CLASS_LOADED_OBJECT, CLASS_LOADED_ATTRIBUTE, warningCritical);
+	}
 }

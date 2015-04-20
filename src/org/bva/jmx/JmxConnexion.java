@@ -1,9 +1,8 @@
 package org.bva.jmx;
 
 import java.io.IOException;
-import java.lang.management.MemoryUsage;
-import java.net.MalformedURLException;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -12,8 +11,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -52,7 +49,7 @@ public class JmxConnexion {
 	public boolean openConnexion(){
 		try {
 			jmxUrl = new JMXServiceURL( JMX_URL_PREFIX + host + ":" + port + JMX_URL_SUFFIX);
-			jmxCon = JMXConnectorFactory.connect(jmxUrl);
+			jmxCon = JMXConnectorFactory.connect(jmxUrl, getEnv());
 			mBeanCon = jmxCon.getMBeanServerConnection();
 			if(jmxCon.getConnectionId() != null) return true;
 		} catch ( IOException e) {
@@ -66,6 +63,14 @@ public class JmxConnexion {
 			jmxUrl = null;
 		}
 		return false;
+	}
+
+	private Map<String, ?> getEnv() {
+		Map<String, Object> env = new HashMap<>();
+		if(login != null && password != null && !login.equals("") && !password.equals("")){
+			env.put(login, password);
+		}
+		return env;
 	}
 
 	public Object queryObject(String name, String attribute) throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException{
