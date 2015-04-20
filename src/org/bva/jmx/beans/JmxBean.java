@@ -1,11 +1,23 @@
 package org.bva.jmx.beans;
 
+import java.io.IOException;
+
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ReflectionException;
+
+import org.bva.jmx.JmxConnexion;
+
 public abstract class JmxBean {
 	final static String OBJECT_JAVA_PREFIX 		= 	"java.lang:type=";
 	final static String OBJECT_HYBRIS_PREFIX 	= 	"hybris:tenantscope=Master Tenant,";
 	
 	final static char	ESCAPE_CAR			=	'\'';
 	final static char	SEP_CAR				=	';';
+	
+	private JmxConnexion jmxCo;
 	
 	private String 		objectName;
 	private String	 	attributes;
@@ -16,10 +28,14 @@ public abstract class JmxBean {
 	private int			min;
 	private int			max;
 	
-	public JmxBean() {
-		value = warning = critival = min = max = -1;
+	public JmxBean(String objectName, String attributes, int warning, int critical) {
+		value =  min = max = -1;
+		this.objectName = objectName;
+		this.attributes = attributes;
+		this.warning = warning;
+		this.critival = critical;
 	}
-	///'EntitiesMissCountInPercent size'=3;1;2;;
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(ESCAPE_CAR);
@@ -37,6 +53,17 @@ public abstract class JmxBean {
 		sb.append(getMax());
 		
 		return sb.toString();
+	}
+	
+	private void queryJmx(){
+		try {
+			Object jxm = jmxCo.queryObject(objectName, attributes);
+		} catch (MalformedObjectNameException | AttributeNotFoundException
+				| InstanceNotFoundException | MBeanException
+				| ReflectionException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private String emptyIfNegative(int i){

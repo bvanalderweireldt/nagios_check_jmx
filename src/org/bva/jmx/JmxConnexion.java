@@ -29,9 +29,9 @@ public class JmxConnexion {
 	private String 	login;
 	private String 	password;
 	
-	JMXServiceURL 			jmxUrl;
-	JMXConnector 			jmxCon;
-	MBeanServerConnection 	mBeanCon;
+	private JMXServiceURL 			jmxUrl;
+	private JMXConnector 			jmxCon;
+	private MBeanServerConnection 	mBeanCon;
 	
 	StringBuilder			output;
 	
@@ -68,14 +68,24 @@ public class JmxConnexion {
 		return false;
 	}
 
-	public void queryObject(String name, String attribute) throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException{
-		ObjectName obj = new ObjectName(name);
-		Object objAttribute = mBeanCon.getAttribute(obj, attribute);
+	public Object queryObject(String name, String attribute) throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException{
+		return mBeanCon.getAttribute(new ObjectName(name), attribute);
+	}
+	
+	public void setHost(String host) {
+		this.host = host;
 	}
 
-	public void queryObject(JmxBeansEnu jmx) throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException{
-		for(String str : jmx.getAttributes()){
-			queryObject(jmx.getObjectName(), str);			
-		}
+	public void setPort(int port) {
+		this.port = port;
 	}
+
+	public void setLogin(String login) {
+		this.login = login;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 }
