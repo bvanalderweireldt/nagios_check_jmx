@@ -1,35 +1,40 @@
 package org.bva.jmx;
 
 public enum JmxBeansEnu {
-	CLASS_LOADING		("ClassLoading", 	new String[]{"LoadedClassCount"}),
-	MEMORY				("Memory", 			new String[]{"HeapMemoryUsage"}),
-	THREADING			("Threading",		new String[]{"ThreadCount"}),
-	RUNTIME				("Runtime",			new String[]{"Uptime"}),	
-	OPERATING_SYSTEM	("OperatingSystem",	new String[]{"AvailableProcessors"}),
-	LOGGING				("Logging",			new String[]{"LoggerLevel"}),
+	CLASS_LOADED		("ClassLoading", 	"LoadedClassCount"),
+	MEMORY_USED			("Memory", 			"HeapMemoryUsage"),
+	THREADING			("Threading",		"ThreadCount"),
+	RUNTIME				("Runtime",			"Uptime"),	
+	OPERATING_SYSTEM	("OperatingSystem",	"AvailableProcessors"),
+	LOGGING				("Logging",			"LoggerLevel"),
 	
-	HYBRIS_CACHE		(JmxBeansEnu.OBJECT_HYBRIS_PREFIX, 	"main=Cache Main",	new String[]{"CurrentCacheSize"});
+	HYBRIS_CACHE		(JmxBeansEnu.OBJECT_HYBRIS_PREFIX, 	"main=Cache Main",	"CurrentCacheSize");
 	
 	final static String OBJECT_JAVA_PREFIX 		= 	"java.lang:type=";
 	final static String OBJECT_HYBRIS_PREFIX 	= 	"hybris:tenantscope=Master Tenant,";
 	private String objectName;
-	private String[] attributes;
+	private String attribute;
 	
-	private JmxBeansEnu(String objectName, String[] attributes) {
-		this(OBJECT_JAVA_PREFIX, objectName, attributes);
+	private JmxBeansEnu(String objectName, String attribute) {
+		this(OBJECT_JAVA_PREFIX, objectName, attribute);
 	}
 
-	private JmxBeansEnu(String objectNamePrefix, String objectName, String[] attributes) {
+	private JmxBeansEnu(String objectNamePrefix, String objectName, String attribute) {
 		this.objectName = objectNamePrefix+objectName;
-		this.attributes = attributes;
+		this.attribute = attribute;
 	}
 
+	@Override
+	public String toString() {
+		return this.attribute;
+	}
+	
 	public String getObjectName() {
 		return objectName;
 	}
 
-	public String[] getAttributes() {
-		return attributes;
+	public String getAttribute() {
+		return attribute;
 	}
 	
 }
