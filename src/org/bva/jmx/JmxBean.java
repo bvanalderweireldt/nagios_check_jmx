@@ -1,4 +1,4 @@
-package org.bva.jmx.beans;
+package org.bva.jmx;
 
 import java.io.IOException;
 
@@ -8,9 +8,6 @@ import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
-
-import org.bva.jmx.JmxBeansEnu;
-import org.bva.jmx.JmxConnexion;
 
 public class JmxBean {
 	final static String OBJECT_JAVA_PREFIX 		= 	"java.lang:type=";
@@ -22,47 +19,45 @@ public class JmxBean {
 	
 	private JmxBeansEnu	jmxType;
 	
-	private String 		objectName;
-	private String	 	attributes;
-
+	private Status status;
+	
 	protected long		value;
-	private int			warning;
-	private int			critival;
+	private Threshold	warning;
+	private Threshold	critival;
 	private int			min;
 	private int			max;
 	
-	private JmxBean(String objectName, String attributes){
+	private JmxBean(){
 		value =  min = max = -1;
-		this.objectName = objectName;
-		this.attributes = attributes;		
 	}
 	
-	private JmxBean(String objectName, String attributes, String warningCritical) {
-		this(objectName, attributes);
+	private JmxBean(String warningCritical) {
+		this();
 		if(warningCritical == null || warningCritical.indexOf(SEP_WAR_CRI) == -1){
 			throw new IllegalArgumentException("warningCritical should be integers : <warning>:<critical>");
 		}
 		String[] args = warningCritical.split(SEP_WAR_CRI);
-		this.warning = Integer.parseInt(args[0]);
-		this.critival = Integer.parseInt(args[1]);
+		this.warning = new Threshold(args[0]);
+		this.critival = new Threshold(args[0]);
 	}
 	
 	public JmxBean(JmxBeansEnu jmxType, String warningCritical){
-		this(jmxType.getObjectName(), jmxType.getAttribute(), warningCritical);
+		this(warningCritical);
 		this.jmxType = jmxType;
 	}
 	
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(ESCAPE_CAR);
-		sb.append(attributes);
+		StringBuilder sb = new StringBuilder(20);
+		sb.append(ESCAPE_CAR);
+		sb.append(jmxType.name());
 		sb.append(ESCAPE_CAR);
 		sb.append('=');
 		sb.append(getValue());
 		sb.append(SEP_CAR);
-		sb.append(getWarning());
+		sb.append(warning.getThreshold());
 		sb.append(SEP_CAR);
-		sb.append(getCritival());
+		sb.append(critival.getThreshold());
 		sb.append(SEP_CAR);
 		sb.append(getMin());
 		sb.append(SEP_CAR);
@@ -70,12 +65,24 @@ public class JmxBean {
 		
 		return sb.toString();
 	}
+
+	public String toStringTitle() {
+		StringBuilder sb = new StringBuilder(20);
+		sb.append(jmxType.name());
+		sb.append('=');
+		sb.append(getValue());
+		
+		return sb.toString();
+	}
 	
 	public void queryJmx(JmxConnexion jmxCo){
 		try {
-			Object jmx = jmxCo.queryObject(objectName, attributes);
+			Object jmx = jmxCo.queryObject(jmxType.getObjectName(), jmxType.getAttribute());
 			
 			getValueFromJmx(jmx);
+			
+			checkStatus();
+			
 		} catch (MalformedObjectNameException | AttributeNotFoundException
 				| InstanceNotFoundException | MBeanException
 				| ReflectionException | IOException e) {
@@ -84,12 +91,27 @@ public class JmxBean {
 		}
 	}
 	
+	private void checkStatus() {
+		if( critival.thresholdTriggered(value) ){
+			status = Status.CRITICAL;
+		}
+		else if ( warning.thresholdTriggered(value) ){
+			status = Status.WARNING;
+		}
+		else {
+			status = Status.WARNING;			
+		}
+	}
+
 	protected void getValueFromJmx(Object jmx) {
 		if(jmx instanceof Number){
 			value = (int) jmx;
 		}
 		else if (jmxType == JmxBeansEnu.MEMORY_USED) {
 			value = ( (Long) ((CompositeDataSupport) jmx).get("used")).intValue() ;
+		}
+		else if (jmxType == JmxBeansEnu.MEMORY_MAX) {
+			value = ( (Long) ((CompositeDataSupport) jmx).get("max")).intValue() ;
 		}
 	}
 
@@ -101,14 +123,6 @@ public class JmxBean {
 		return emptyIfNegative(value);
 	}
 	
-	public String getWarning(){
-		return emptyIfNegative(warning);		
-	}
-
-	public String getCritival(){
-		return emptyIfNegative(critival);		
-	}
-
 	public String getMin(){
 		return emptyIfNegative(min);		
 	}
@@ -116,4 +130,9 @@ public class JmxBean {
 	public String getMax(){
 		return emptyIfNegative(max);		
 	}
+	
+	public Status getStatus() {
+		return status;
+	}
+
 }

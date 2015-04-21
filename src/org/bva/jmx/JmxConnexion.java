@@ -68,7 +68,7 @@ public class JmxConnexion {
 	private Map<String, ?> getEnv() {
 		Map<String, Object> env = new HashMap<>();
 		if(login != null && password != null && !login.equals("") && !password.equals("")){
-			env.put(login, password);
+			env.put(JMXConnector.CREDENTIALS, new String[] { login, password });
 		}
 		return env;
 	}

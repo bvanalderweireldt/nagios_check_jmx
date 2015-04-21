@@ -3,10 +3,11 @@ package org.bva.jmx;
 public enum JmxBeansEnu {
 	CLASS_LOADED		("ClassLoading", 	"LoadedClassCount"),
 	MEMORY_USED			("Memory", 			"HeapMemoryUsage"),
-	THREADING			("Threading",		"ThreadCount"),
-	RUNTIME				("Runtime",			"Uptime"),	
-	OPERATING_SYSTEM	("OperatingSystem",	"AvailableProcessors"),
-	LOGGING				("Logging",			"LoggerLevel"),
+	MEMORY_MAX			("Memory", 			"HeapMemoryUsage"),
+	THREAD_COUNT		("Threading",		"ThreadCount"),
+	RUNTIME_UPTIME		("Runtime",			"Uptime"),	
+	OS_CPU				("OperatingSystem",	"AvailableProcessors"),
+	LOG_LEVEL			("Logging",			"LoggerLevel"),
 	
 	HYBRIS_CACHE		(JmxBeansEnu.OBJECT_HYBRIS_PREFIX, 	"main=Cache Main",	"CurrentCacheSize");
 	
